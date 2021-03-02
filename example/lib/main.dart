@@ -1,13 +1,3 @@
-/*
-1) Play the song first
-2) Press the seek button when the song is fully loaded and played
-3) when AudioService.playbackStateStream == AudioProcessingState.buffering
-stop the music. Here you see that positionStream gets stuck on 2 minutes
-and does not become zero.(This is a bug)
-4) Finally, play the song again
-5) And you see that positionStream gets stuck for 2 minutes and does not start over
- */
-
 
 import 'dart:async';
 
@@ -30,7 +20,27 @@ class App extends StatelessWidget {
   }
 }
 
-class Test extends StatelessWidget {
+class Test extends StatefulWidget {
+  @override
+  _TestState createState() => _TestState();
+}
+
+class _TestState extends State<Test> {
+  @override
+  void initState() {
+    super.initState();
+
+    AudioService.currentMediaItemStream.listen(
+      (event) {
+        if (event != null) {
+          print('---------------------------------------');
+          print(event.extras);
+          print('---------------------------------------');
+
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +63,9 @@ class Test extends StatelessWidget {
               stream: AudioService.playbackStateStream,
               builder: (context, playbackState) {
                 return Text(
-                  playbackState.hasData ? (playbackState.data as PlaybackState).processingState.toString() : 'not initial',
+                  playbackState.hasData
+                      ? (playbackState.data as PlaybackState).processingState.toString()
+                      : 'not initial',
                 );
               },
             ),
@@ -82,7 +94,6 @@ class Test extends StatelessWidget {
                 // Enable this if you want the Android service to exit the foreground state on pause.
                 //androidStopForegroundOnPause: true,
                 androidNotificationColor: 0xFF2196f3,
-                androidNotificationIcon: 'mipmap/ic_launcher',
                 androidEnableQueue: true,
               );
             },
@@ -227,20 +238,24 @@ class AudioPlayerTask extends BackgroundAudioTask {
 }
 
 final items = <MediaItem>[
-  const MediaItem(
-    id: "https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3",
-    album: "Science Friday",
-    title: "A Salute To Head-Scratching Science",
-    artist: "Science Friday and WNYC Studios",
-    duration: Duration(milliseconds: 5739820),
-    artUri: "https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg",
-  ),
-  const MediaItem(
-    id: "https://s3.amazonaws.com/scifri-segments/scifri201711241.mp3",
-    album: "Science Friday",
-    title: "From Cat Rheology To Operatic Incompetence",
-    artist: "Science Friday and WNYC Studios",
-    duration: Duration(milliseconds: 2856950),
-    artUri: "https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg",
-  ),
+  MediaItem(
+      id: "https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3",
+      album: "Science Friday",
+      title: "A Salute To Head-Scratching Science",
+      artist: "Science Friday and WNYC Studios",
+      duration: const Duration(milliseconds: 5739820),
+      artUri: "https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg",
+      extras: {
+        'data': {'key1': 'value1'},
+      }),
+  MediaItem(
+      id: "https://s3.amazonaws.com/scifri-segments/scifri201711241.mp3",
+      album: "Science Friday",
+      title: "From Cat Rheology To Operatic Incompetence",
+      artist: "Science Friday and WNYC Studios",
+      duration: const Duration(milliseconds: 2856950),
+      artUri: "https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg",
+      extras: {
+        'data': {'key1': 'value1'}
+      }),
 ];
